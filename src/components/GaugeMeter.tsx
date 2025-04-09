@@ -1,116 +1,117 @@
-
-import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
+import { useEffect, useRef, useState } from "react";
+import { gsap } from "gsap";
 
 interface GaugeMeterProps {
-  value: number;
-  percentage: number; // Added percentage value
-  max: number;
-  threshold: {
-    critical: number;
-    warning: number;
-  };
-  size?: "sm" | "md" | "lg";
-  label?: string;
-  animate?: boolean;
+  value: number; // Current value
+  max: number;   // Maximum value
 }
 
-export default function GaugeMeter({
-  value,
-  percentage,
-  max,
-  threshold,
-  size = "lg",
-  label = "Gas Level",
-  animate = true,
-}: GaugeMeterProps) {
-  const [angle, setAngle] = useState(0);
-  
-  // Calculate angle based on percentage
+export default function GaugeMeter({ value, max }: GaugeMeterProps) {
+  const [percentage, setPercentage] = useState(0);
+  const gaugeRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    // Convert value to percentage of max, then to angle
-    // Gauge spans from -120 to 120 degrees (240 degree spread)
-    const percentageValue = Math.min(1, Math.max(0, value / max));
-    const newAngle = -120 + (percentageValue * 240);
-    
-    setAngle(newAngle);
+    const calculatedPercentage = Math.min(100, Math.max(0, (value / max) * 100));
+    setPercentage(calculatedPercentage);
+
+    if (gaugeRef.current) {
+      gsap.to(gaugeRef.current, {
+        background: `conic-gradient(
+          ${getDynamicColor(calculatedPercentage)} 0deg, 
+          ${getDynamicColor(calculatedPercentage)} ${calculatedPercentage * 3.6}deg, 
+          #e0e0e0 ${calculatedPercentage * 3.6}deg 360deg
+        )`,
+        duration: 1,
+        ease: "power2.out",
+      });
+    }
   }, [value, max]);
-  
-  // Determine color based on thresholds
-  const getColorClass = () => {
-    if (value <= threshold.critical) return "text-gas-low";
-    if (value <= threshold.warning) return "text-gas-medium";
-    return "text-gas-high";
-  };
 
-  // Size classes
-  const sizeClasses = {
-    sm: "w-48 h-28",
-    md: "w-64 h-36",
-    lg: "w-80 h-44",
-  };
-
-  // Determine pressure status text
-  const getStatusText = () => {
-    if (value <= threshold.critical) return "Low";
-    if (value <= threshold.warning) return "Medium";
-    return "Good";
+  const getDynamicColor = (percentage: number) => {
+    if (percentage <= 30) return `rgba(255, 77, 77, ${0.5 + percentage / 60})`; // Red with increasing opacity
+    if (percentage <= 70) return `rgba(255, 204, 0, ${0.5 + (percentage - 30) / 80})`; // Yellow with increasing opacity
+    return `rgba(76, 175, 80, ${0.5 + (percentage - 70) / 60})`; // Green with increasing opacity
   };
 
   return (
-    <div className={cn("relative mx-auto", sizeClasses[size])}>
-      {/* Gauge background */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-full h-full bg-secondary rounded-t-full overflow-hidden">
-          {/* Gauge segments */}
-          <div className="absolute bottom-0 left-0 right-0 h-1/2 flex">
-            <div className="w-1/3 h-full bg-gas-low/20 rounded-bl-full" />
-            <div className="w-1/3 h-full bg-gas-medium/20" />
-            <div className="w-1/3 h-full bg-gas-high/20 rounded-br-full" />
-          </div>
-          
-          {/* Ticks */}
-          <div className="absolute bottom-0 left-0 right-0 h-full">
-            {Array.from({ length: 11 }).map((_, i) => (
-              <div 
-                key={i} 
-                className="absolute bottom-0 w-[2px] h-[12px] bg-gray-400"
-                style={{ 
-                  left: `${5 + (i * 9)}%`,
-                  transform: `translateX(-50%) rotate(${-120 + (i * 24)}deg)`,
-                  transformOrigin: 'bottom center' 
-                }}
-              />
-            ))}
-          </div>
-          
-          {/* Needle with dynamic rotation */}
-          <div 
-            className="gas-gauge-needle"
-            style={{ 
-              transform: `rotate(${angle}deg)`,
-              animation: animate ? 'rotate-gauge 1s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none',
-              '--rotation-angle': `${angle}deg`
-            } as React.CSSProperties}
-          >
-            <div className="absolute -top-1 -left-[3px] w-[7px] h-[7px] rounded-full bg-foreground" />
-          </div>
-          
-          {/* Center pivot */}
-          <div className="absolute bottom-0 left-1/2 w-3 h-3 rounded-full bg-foreground transform -translate-x-1/2" />
-        </div>
-      </div>
-      
-      {/* Labels */}
-      <div className="absolute bottom-[-40px] left-0 right-0 text-center">
-        <div className="text-sm text-muted-foreground uppercase tracking-wider">{label}</div>
-        <div className={cn("pressure-text", getColorClass())}>
-          {percentage.toFixed(1)}% <span className="text-sm ml-1">({value.toFixed(1)} kPa)</span>
-        </div>
-        <div className={cn("text-sm font-medium", getColorClass())}>
-          {getStatusText()}
+    <div className="gauge-container">
+      <div className="gauge">
+        <div
+          className="gauge-arc"
+          ref={gaugeRef}
+          style={{
+            background: `conic-gradient(
+              ${getDynamicColor(percentage)} 0deg, 
+              ${getDynamicColor(percentage)} ${percentage * 3.6}deg, 
+              #e0e0e0 ${percentage * 3.6}deg 360deg
+            )`,
+          }}
+        ></div>
+        <div className="gauge-center">
+          <span className="gauge-percentage">{percentage.toFixed(1)}%</span>
         </div>
       </div>
     </div>
   );
+}
+
+// Styles (CSS-in-JS or external CSS can be used)
+const styles = `
+.gauge-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 250px;
+  height: 250px;
+  margin: 0 auto;
+}
+
+.gauge {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.gauge-arc {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  transform-origin: center;
+  transition: background 0.5s ease-in-out;
+}
+
+.gauge-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.gauge-percentage {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  font-family: "Arial", sans-serif;
+}
+`;
+
+// Inject styles into the document head (optional)
+if (typeof document !== "undefined") {
+  const styleSheet = document.createElement("style");
+  styleSheet.type = "text/css";
+  styleSheet.innerText = styles;
+  document.head.appendChild(styleSheet);
 }

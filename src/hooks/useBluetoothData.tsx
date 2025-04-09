@@ -1,8 +1,16 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
+import client from "@/components/MQTTClient";
 
+//EXAMPLE VALUES TO BE PUT IN THE HIVEMQ. Need to put in JSON format itself:
+/*{
+   "pressure": 900,
+   "temperature": 42.3,
+   "gasLeakage": true
+ }*/
 // Mock data for development purposes
+
 const MOCK_DATA = {
   min: 0,
   max: 15,
@@ -33,7 +41,7 @@ export function useBluetoothData() {
     lastUpdated: null,
   });
 
-  const [mockMode, setMockMode] = useState(true);
+  const [mockMode, setMockMode] = useState(false);
   const [mockPressure, setMockPressure] = useState(MOCK_DATA.max * 0.7);
   const [mockTemp, setMockTemp] = useState(28); // Initial mock temperature
   const [mockLeakage, setMockLeakage] = useState(false); // Initial mock leakage
@@ -88,6 +96,61 @@ export function useBluetoothData() {
       if (interval) clearInterval(interval);
     };
   }, [mockMode, data.status, mockPressure, mockTemp, mockLeakage]);
+
+  useEffect(()=>{
+    if(!mockMode) {
+      const handleConnect = ()=>{
+        client.subscribe("proteus_sensor_data", (err)=>{
+          if(err){
+            console.error("Bluetooth Provider: Subscription error", err);
+          } else{
+            console.log("Bluetooth Provider: Subscribed to topic", "proteus_sensor_data");
+          }
+        });
+      };
+
+      const handleMessage = (_topic: string, message: Buffer)=>{
+        try {
+          const payload = JSON.parse(message.toString());
+          const pressure = parseFloat(payload.pressure);
+          const temperature = parseFloat(payload.temperature);
+          const gasLeakage = Boolean(payload.gasLeakage);
+
+          // const pressurePercentage = (pressure / MOCK_DATA.max) * 100;
+          const pressurePercentage = (pressure / 21) ;
+
+          if (gasLeakage && !data.gasLeakage) {
+            toast.error("Gas leakage detected! Please check your connections.", {
+              duration: 5000,
+            });
+          }
+
+          setData(prev => ({
+            ...prev,
+            pressure,
+            pressurePercentage: parseFloat(pressurePercentage.toFixed(1)),
+            temperature,
+            gasLeakage,
+            lastUpdated: new Date(),
+          }));
+        } catch (err) {
+          console.error("Failed to parse MQTT message:", err);
+        }
+      };
+
+      if (!client.connected) {
+        client.on("connect", handleConnect);
+      } else {
+        handleConnect();
+      }
+
+      client.on("message", handleMessage);
+
+      return () => {
+        client.off("message", handleMessage);
+      };
+    }
+  }, [mockMode, data.gasLeakage, data.status]);
 
   // In a real app, this would use Web Bluetooth API to connect to HC05
   const connectBluetooth = useCallback(async () => {

@@ -1,0 +1,2 @@
+kPA/21 gives percentage.
+UI for gauge meter to be changed.

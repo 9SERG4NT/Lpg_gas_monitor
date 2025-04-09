@@ -11,6 +11,7 @@ import Booking from "./pages/Booking";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Header from "./components/Header";
+import MQTTListener from "./components/MQTTListener";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,8 @@ const App = () => {
               onConnect={connectBluetooth}
               onDisconnect={disconnectBluetooth}
             />
+            
+            {/* <MQTTListener /> */}
             
             <div className="max-w-md mx-auto pt-8">
               <Routes>
