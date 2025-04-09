@@ -1,70 +1,104 @@
-# Welcome to your Lovable project
 
-## Project info
+# IoT Sensor Data Web App via MQTT
 
-**URL**: https://lovable.dev/projects/22b5556a-b0f2-4e86-9094-c1494a8b3988
+## 📦 Project Overview
 
-## How can I edit this code?
+This project is a real-time IoT web application that receives sensor data from an IoT device using the MQTT protocol. The device collects environmental data and sends it to a public MQTT broker (HiveMQ), which then transfers the data to this React-based web application for live visualization.
 
-There are several ways of editing your application.
+MQTT (Message Queuing Telemetry Transport) is a lightweight messaging protocol ideal for IoT communication. HiveMQ is used as the broker in this setup to facilitate the connection between the device and the web app.
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/22b5556a-b0f2-4e86-9094-c1494a8b3988) and start prompting.
+## 🚀 How to Run Locally
 
-Changes made via Lovable will be committed automatically to this repo.
+Follow these instructions and you'll be able to run the project smoothly:
 
-**Use your preferred IDE**
+### 1. Clone the Repository
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+git clone <your_repo>
 
-Follow these steps:
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### 2. Navigate into the Project Folder
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+cd <your_project_name>
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+
+### 3. Install Dependencies
+
+
+npm install
+
+
+### 4. Set Up Your MQTT Broker (HiveMQ)
+
+- Create a free account on [HiveMQ Cloud](https://www.hivemq.com/mqtt-cloud-broker/)
+- Set up a new cluster
+- Note down your **Broker URL**, **Username**, and **Password**
+- Open the file:
+
+
+/src/components/MQTTClient.tsx
+
+
+- Replace:
+  - `BROKER_URL` with your cluster's URL
+  - `username` and `password` with your HiveMQ credentials
+
+### 5. Set the MQTT Topic (Optional)
+
+By default, the topic used in:
+
+
+/src/hooks/useBluetoothData.tsx
+
+
+is:
+
+proteus_sensor_data
+
+
+If you're using a different topic, update it accordingly.
+
+### 6. Start the Development Server
+
+
 npm run dev
-```
 
-**Edit a file directly in GitHub**
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+The application will start on `http://localhost:5173` (or another port assigned by Vite).
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 💡 Sending a Sample Message
 
-## What technologies are used for this project?
+To test your setup:
+- Use the HiveMQ Web Client or your IoT device to send a test message.
+- Make sure you're publishing to the topic used in the application.
+- Once a message is sent, it should appear in your web app dashboard.
 
-This project is built with .
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🛠 Technologies Used
 
-## How can I deploy this project?
+This project is built with:
 
-Simply open [Lovable](https://lovable.dev/projects/22b5556a-b0f2-4e86-9094-c1494a8b3988) and click on Share -> Publish.
+- ⚡ **Vite** – Fast development server and bundler
+- 🟦 **TypeScript** – Superset of JavaScript for type safety
+- ⚛️ **React** – Modern front-end library
+- 🧩 **shadcn/ui** – Accessible, headless UI components
+- 🎨 **Tailwind CSS** – Utility-first CSS framework for fast styling
 
-## I want to use a custom domain - is that possible?
+---
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
-# Lpg_gas_monitor
+## 📬 Contact / Contribute
+
+If you’d like to contribute:
+- Fork the repository
+- Make your changes
+- Submit a pull request
+
+Feel free to open issues for any bugs or suggestions!
+
+---
