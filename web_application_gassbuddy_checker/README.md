@@ -16,7 +16,7 @@ Follow these instructions and you'll be able to run the project smoothly:
 ### 1. Clone the Repository
 
 
-git clone <your_repo>
+git clone (https://github.com/9SERG4NT/Lpg_gas_monitor.git)
 
 
 ### 2. Navigate into the Project Folder
