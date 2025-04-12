@@ -48,7 +48,7 @@ This project helps monitor LPG gas usage and detect leaks by combining multiple 
 
 ```bash
 # Clone the repo
-git clone https://github.com/yourusername/smart-lpg-monitor.git
+git clone https://github.com/9SERG4NT/Lpg_gas_monitor.git
 
 # Navigate to frontend
 cd web_application_gassbuddy_checker
