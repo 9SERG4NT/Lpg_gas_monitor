@@ -44,6 +44,21 @@ This project helps monitor LPG gas usage and detect leaks by combining multiple 
 4. Web app subscribes to this topic and parses incoming data.
 5. Dashboard updates in real time and triggers auto-booking if needed.
 
+### 💻 Web Application
+
+```bash
+# Clone the repo
+git clone https://github.com/yourusername/smart-lpg-monitor.git
+
+# Navigate to frontend
+cd web_application_gassbuddy_checker
+
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev
+
 ### 📦 Example MQTT Payload
 ```json
 {
